@@ -8,7 +8,7 @@ Download everything from either (1) my dropbox (folder A2) or (2) clone this rep
 
 ### Prerequisites
 
-I developed this in Python 3.6.4, and used the json and numpy libraries.
+I developed this in Python 3.6.4, and used the json, sys, and numpy libraries.
 
 ### Exercises
 
