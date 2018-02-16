@@ -74,7 +74,7 @@ jupyter notebook A2.ipynb
 
 You can then run cells individually.
 
-The K parameter is originally set to 25, but can be changed in cell 6.
+The K parameter is originally set to 25, but can be changed in cell 5.
 **Make sure cell 5 is commented correctly.**
 
 ```
