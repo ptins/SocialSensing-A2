@@ -1,105 +1,121 @@
-# CSE40437/CSE60437 - A1
+# CSE40437/CSE60437 - A2
 
-This is the first assignment for my Social Sensing/Cyber-Physical Systems Class.
-
-See this README in a nicer format on GitHub at https://github.com/ptins/A1/blob/master/README.md.
+This is the second assignment for my Social Sensing/Cyber-Physical Systems Class.
 
 ## Getting Started
 
-Download everything from either (1) my dropbox (folder A1) or (2) clone this repository on GitHub.
+Download everything from either (1) my dropbox (folder A2) or (2) clone this repository on GitHub.
 
 ### Prerequisites
 
-I developed this in Python 3.6.4, and used the tweepy library to access Twitter's API. 
-Tweepy can be installed with the following command, which is also listed in my Python script.
+I developed this in Python 3.6.4, and used the json and numpy libraries.
 
+### Exercises
+
+Implement the tweet clustering function using the Jaccard Distance metric and K-means clustering algorithm introduced above to cluster redundant/repeated tweets into the same cluster. You are expected to do the K-means implementation by yourself, so please do not use any external library that has K-means implementation in your code.
+
+Note that while the K-means algorithm is proven to converge, the algorithm is sensitive to the k initial selected cluster centroids (i.e., seeds) and the clustering result is not necessarily optimal on a random selection of seeds. In this assignment, we provide you with a list of K initial centroids that has been tested to generate good results.
+
+Inputs to your K-means Algorithm:
+
+(1) The number of clusters K=25.
+
+(2) A real world dataset sampled from Twitter during the Boston Marathon Bombing event in April 2013 that contains 251 tweets. Tweet Dataset Download .
+
+(3) The list of initial centroids is here: Initial Seeds . Note that each element in this list is the tweet ID (i.e., the id field in JSON format) of the tweet in the dataset.
+
+Jaccard Distance Function
 ```
-pip3 install tweepy
+def jacc_dist(tweet1, tweet2):
+    a = set(tweet1.split(' '))
+    b = set(tweet2.split(' '))
+    a_and_b = a.intersection(b)
+    a_union_b = a.union(b)
+    return 1-len(a_and_b)/len(a_union_b)
+```
+
+K-means Algorithm
+```
+while(True):
+    
+    # cluster phase
+    cd = cluster_tweets(tweet_dict, centroid_ids)
+    
+    # save old centroids for checking convergence
+    centroid_ids_old = centroid_ids
+    
+    # update phase - new centroid_ids
+    centroid_ids = update_centers(tweet_dict, cd)
+
+    if centroid_ids == centroid_ids_old: # convergence reached
+        
+        print('iteration #{}: converged'.format(iter_no))
+        
+        # write to file
+        with open('results.txt', 'w') as file:
+             file.write(json.dumps(cd))
+        
+        # break out of loop
+        break
+        
+    else: # has not converged
+    
+        print('iteration #{}: converging...'.format(iter_no))
+        iter_no += 1
 ```
 
 ## Running the Script
 
-My preferred way to run this program is in a Jupyter notebook, which can be installed via the following command.
+To run this script in Jupyter, cd into the A1 project folder, and open the notebook (A2.ipynb) with the following command.
 
 ```
-python3 -m pip install --upgrade pip
-python3 -m pip install jupyter
-```
-
-After installing Jupyter, cd into the A1 project folder, and open the notebook (A1.ipynb) with the following command.
-
-```
-jupyter notebook A1.ipynb
+jupyter notebook A2.ipynb
 ```
 
 You can then run cells individually.
 
-
-If you elect to run this program from the command line, use the following command.
-
-```
-python3 A1_script.py
-```
-
-**Regardless of the method used above, there are two things that need to be done to run this program.** 
-1. Insert your consumer API credentials (consumer key/secret) and access credentials (access token/secret). 
-2. Comment/uncomment out certain lines to actually run the different tasks; they are initially commented out to avoid rate limits on Twitter's API.
-
-### Task 1
-
-Task - Given a list of user IDs, please write a data crawler to collect the users' profile information.
-
-Make sure the following line (cell 6) is executable/not commented out.
+The K parameter is originally set to 25, but can be changed in cell 6.
+**Make sure cell 5 is commented correctly.**
 
 ```
-[write_profile_information(user) for user in api.lookup_users(user_ids)]
+# if(len(sys.argv) == 3):
+#     tweets_file = sys.argv[1]
+#     seeds_file = sys.argv[2]
+#     k = 25
+# if(len(sys.argv) == 4):
+#     tweets_file = sys.argv[1]
+#     seeds_file = sys.argv[2]
+#     k = int(sys.argv[3])
+tweets_file = './tweets.json'
+seeds_file = './seeds.txt'
+k = 25
 ```
 
-I saved the resulting file containing the profile information in profile_information.txt
-
-### Task 2
-
-Task - Given a list of user IDs, please write a data crawler to collect the user social network information (i.e., the lists of screen names of the user's friends and followers)
-
-Make sure the following line (cell 8) is executable/not commented out.
+To run this script from the command line, use the following commands.
+**Make sure cell 5 is commented correctly.**
 
 ```
-[write_social_information(user) for user in api.lookup_users(user_ids)]
+if(len(sys.argv) == 3):
+    tweets_file = sys.argv[1]
+    seeds_file = sys.argv[2]
+    k = 25
+if(len(sys.argv) == 4):
+    tweets_file = sys.argv[1]
+    seeds_file = sys.argv[2]
+    k = int(sys.argv[3])
+# tweets_file = './tweets.json'
+# seeds_file = './seeds.txt'
+# k = 25
 ```
 
-I saved the resulting file containing the profile information in social_information.txt
-
-### Task 3.1
-
-Task - Please write a data crawler to collect tweets that contain one of the following two keywords: [Indiana, weather]
-
-NOTE: For Task 3.1, the stream for this subsection requires that the other stream (latlong) be commented out; see below. 
+Running the following command (only 3 arguments) will execute the script with 25-means clustering.
 
 ```
-# (1) collect tweets that contain one of the following two keywords: [Indiana, weather] 
-stream.filter(track=keywords, async=True)
-
-# (2) collect tweets that originate from the geographic region around South Bend
-# NOTE THAT THE BELOW LINE IS COMMENTED OUT
-# stream.filter(locations=latlong, async=True)
+python3 A2_script.py tweets.txt seeds.txt
 ```
 
-I saved the resulting file containing the tweets in tweets_keywords.txt (note the name difference from 'tweets.txt')
-
-### Task 3.2
-
-Task - Please write a data crawler to collect tweets that originate from the geographic region around South Bend.
-
-NOTE: For Taks 3.2, the stream for this subsection requires that the other stream (keywords) be commented out; see below.
+Running the following command (with the 4th argument) will execute the script with 10-means clustering.
 
 ```
-# (1) collect tweets that contain one of the following two keywords: [Indiana, weather] 
-# NOTE THAT THE BELOW LINE IS COMMENTED OUT
-# stream.filter(track=keywords, async=True)
-
-# (2) collect tweets that originate from the geographic region around South Bend
-stream.filter(locations=latlong, async=True)
+python3 A2_script.py tweets.txt seeds.txt 10
 ```
-
-I saved the resulting file containing the tweets in tweets_latlong.txt (note the name difference from 'tweets.txt')
-

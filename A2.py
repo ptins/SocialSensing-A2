@@ -4,7 +4,7 @@
 # In[1]:
 
 
-import json 
+import json, sys
 import numpy as np
 
 
@@ -87,18 +87,33 @@ def update_centers(tweet_dict, centroid_dict):
 # In[5]:
 
 
-tweet_dict = {}
-for tweet in open('./tweets.json'):
-    tweet_json = json.loads(tweet)
-    tweet_dict[tweet_json['id']] = tweet_json['text']
+if(len(sys.argv) == 3):
+    tweets_file = sys.argv[1]
+    seeds_file = sys.argv[2]
+    k = 25
+if(len(sys.argv) == 4):
+    tweets_file = sys.argv[1]
+    seeds_file = sys.argv[2]
+    k = int(sys.argv[3])
+#tweets_file = './tweets.json'
+#seeds_file = './seeds.txt'
+#k = 25
 
 
 # In[6]:
 
 
-with open('./seeds.txt') as f:
+tweet_dict = {}
+for tweet in open(tweets_file):
+    tweet_json = json.loads(tweet)
+    tweet_dict[tweet_json['id']] = tweet_json['text']
+
+with open(seeds_file) as f:
     centroid_ids = f.readlines()
 centroid_ids = [int(x.strip().replace(',','')) for x in centroid_ids]
+
+# implement k parameter
+centroid_ids = list(np.random.choice(centroid_ids, size=k, replace=False))
 
 
 # In[7]:
@@ -106,6 +121,8 @@ centroid_ids = [int(x.strip().replace(',','')) for x in centroid_ids]
 
 # tracking
 iter_no = 1
+
+print('using {}-means algorithm'.format(k))
 
 while(True):
     
